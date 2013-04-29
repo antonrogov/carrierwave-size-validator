@@ -29,8 +29,8 @@ module ActiveModel
         keys.each do |key|
           value = options[key]
 
-          unless value.is_a?(Integer) && value >= 0
-            raise ArgumentError, ":#{key} must be a nonnegative Integer"
+          unless (value.is_a?(Integer) && value >= 0) || value.is_a?(Proc)
+            raise ArgumentError, ":#{key} must be a nonnegative Integer or Proc"
           end
         end
       end
@@ -46,6 +46,8 @@ module ActiveModel
 
         CHECKS.each do |key, validity_check|
           next unless check_value = options[key]
+
+          check_value = check_value.call(record) if check_value.is_a?(Proc)
 
           value ||= [] if key == :maximum
 
